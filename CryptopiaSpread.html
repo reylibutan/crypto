@@ -1,0 +1,48 @@
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Cryptopia Spread</title>
+</head>
+<body>
+  <script
+  src="https://code.jquery.com/jquery-3.2.1.min.js"
+  integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4="
+  crossorigin="anonymous"></script>
+  <script>
+    $(function() {
+        var MIN_SPREAD = 20;
+        var MIN_VOLUME = 0.5;
+
+        var settings = {
+            "async": true,
+            "crossDomain": true,
+            "url": "https://www.cryptopia.co.nz/api/GetMarkets/BTC",
+            "method": "GET"
+        }
+
+        $.ajax(settings).done(function(response) {
+            var totalCoins = 0;
+            var coins = response.Data;
+            var results = [];
+            for (var i = 0; i < coins.length; i++) {
+                var coin = coins[i];
+                var spread = (coin.AskPrice - coin.BidPrice) / coin.BidPrice * 100;
+                if (spread >= MIN_SPREAD && coin.BaseVolume > MIN_VOLUME) {
+                    results.push(new Coin(coin.Label.substring(0, coin.Label.length - 4), spread, coin.Change, coin.BaseVolume));
+                    totalCoins++;
+                }
+            }
+
+            console.table(results);
+        });
+    })
+
+    function Coin(symbol, spread, dailyChange, volume) {
+        this.symbol = symbol;
+        this.spread = spread;
+        this.volume = volume;
+        this.dailyChange = dailyChange;
+    }
+  </script>
+</body>
+</html>
